@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useGoogleLogin } from '@react-oauth/google';
 
 // Helper function to merge class names
 const cn = (...classes: (string | boolean | undefined)[]) => {
@@ -233,6 +234,30 @@ export const SignInCard = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
+    const loginWithGoogle = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                setLoading(true);
+                setError("");
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001'}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenResponse.access_token }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Google Authentication failed');
+                
+                login(data.user, data.token);
+                navigate("/dashboard");
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => setError('Google login failed'),
+    });
+
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -325,7 +350,7 @@ export const SignInCard = () => {
                             <button
                                 type="button"
                                 className="w-full flex items-center justify-center gap-2 bg-white/50 border border-white/60 rounded-lg p-3 hover:bg-white/70 transition-all duration-300 text-gray-700 shadow-sm"
-                                onClick={() => console.log("Google sign-in")}
+                                onClick={() => loginWithGoogle()}
                             >
                                 <svg className="h-5 w-5" width="20" height="20" viewBox="0 0 24 24">
                                     <path

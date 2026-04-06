@@ -58,6 +58,7 @@ export default function Dashboard({ isDarkMode, setIsDarkMode }: { isDarkMode: b
 
     useEffect(() => {
         const init = async () => {
+            console.log('Dashboard init, token:', !!token);
             if (!token) return;
             setLoading(true);
             await fetchDashboard();

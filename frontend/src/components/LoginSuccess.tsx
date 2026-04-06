@@ -18,10 +18,11 @@ export default function LoginSuccess() {
         if (token && id && name && email) {
             try {
                 // Log the user in
+                console.log('About to call login...');
                 login({ id, name, email }, token);
                 
                 // Navigate to dashboard immediately
-                console.log('Navigating to dashboard...');
+                console.log('Login called, about to navigate...');
                 navigate('/dashboard', { replace: true });
             } catch (err) {
                 console.error('Login error:', err);

@@ -13,14 +13,31 @@ export default function LoginSuccess() {
         const name = searchParams.get('name');
         const email = searchParams.get('email');
 
+        console.log('LoginSuccess Handling Params:', { token: !!token, id, name, email });
+
         if (token && id && name && email) {
-            // Log the user in
-            login({ id, name, email }, token);
-            // Redirect to dashboard
-            navigate('/dashboard');
+            try {
+                // Log the user in
+                login({ id, name, email }, token);
+                
+                // Small delay to ensure state is set before navigating
+                const timer = setTimeout(() => {
+                    console.log('Navigating to dashboard...');
+                    navigate('/dashboard', { replace: true });
+                }, 500);
+
+                return () => clearTimeout(timer);
+            } catch (err) {
+                console.error('Login error:', err);
+                navigate('/login');
+            }
         } else {
             console.error('Failed to log in with Google: Missing parameters');
-            navigate('/login');
+            // If we're already on dashboard but seeing this, maybe we're already authenticated?
+            const timer = setTimeout(() => {
+                navigate('/dashboard');
+            }, 2000);
+            return () => clearTimeout(timer);
         }
     }, [searchParams, login, navigate]);
 

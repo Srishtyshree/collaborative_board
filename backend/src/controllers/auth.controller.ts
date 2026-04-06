@@ -52,3 +52,37 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to login' });
     }
 };
+
+export const googleLogin = async (req: Request, res: Response) => {
+    const { token } = req.body;
+    try {
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const googleUser = await userInfoRes.json();
+        
+        if (!userInfoRes.ok) {
+            return res.status(401).json({ error: 'Invalid Google token' });
+        }
+
+        const { email, name } = googleUser;
+
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-10), 10);
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    password: randomPassword,
+                    name: name || 'Google User',
+                }
+            });
+        }
+
+        const jwtToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ user: { id: user.id, email: user.email, name: user.name }, token: jwtToken });
+    } catch (error) {
+        console.error('Google Login Error:', error);
+        res.status(500).json({ error: 'Failed to authenticate with Google' });
+    }
+};

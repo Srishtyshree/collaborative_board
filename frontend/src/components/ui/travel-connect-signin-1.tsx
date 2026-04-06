@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useGoogleLogin } from '@react-oauth/google';
 
 // Helper function to merge class names
 const cn = (...classes: (string | boolean | undefined)[]) => {
@@ -233,6 +234,30 @@ export const SignInCard = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
+    const loginWithGoogle = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                setLoading(true);
+                setError("");
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001'}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenResponse.access_token }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Google Authentication failed');
+                
+                login(data.user, data.token);
+                navigate("/dashboard");
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        },
+        onError: () => setError('Google login failed'),
+    });
+
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -269,11 +294,11 @@ export const SignInCard = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="w-full max-w-4xl overflow-hidden rounded-2xl flex bg-white shadow-xl"
+                className="w-full max-w-4xl overflow-hidden rounded-2xl flex glass-panel shadow-2xl border border-white/50"
             >
                 {/* Left side - Map */}
-                <div className="hidden md:block w-1/2 h-[600px] relative overflow-hidden border-r border-gray-100">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div className="hidden md:block w-1/2 h-[600px] relative overflow-hidden border-r border-white/30">
+                    <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]">
                         <DotMap />
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
                             <motion.div
@@ -306,8 +331,8 @@ export const SignInCard = () => {
                     </div>
                 </div>
 
-                {/* Right side - Form */}
-                <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-white">
+                {/* Right side - Sign In Form */}
+                <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-white/40 backdrop-blur-md">
                     <motion.div
                         layout
                         initial={{ opacity: 0, y: 20 }}
@@ -321,8 +346,47 @@ export const SignInCard = () => {
                             {isSignup ? "Start collaborating today" : "Sign in to your account"}
                         </p>
 
+                        <div className="mb-6">
+                            <button
+                                type="button"
+                                className="w-full flex items-center justify-center gap-2 bg-white/50 border border-white/60 rounded-lg p-3 hover:bg-white/70 transition-all duration-300 text-gray-700 shadow-sm"
+                                onClick={() => loginWithGoogle()}
+                            >
+                                <svg className="h-5 w-5" width="20" height="20" viewBox="0 0 24 24">
+                                    <path
+                                        fill="currentColor"
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                        fillOpacity=".54"
+                                    />
+                                    <path
+                                        fill="#4285F4"
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                    />
+                                    <path
+                                        fill="#34A853"
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                    />
+                                    <path
+                                        fill="#FBBC05"
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                    />
+                                    <path fill="#EA4335" d="M1 1h22v22H1z" fillOpacity="0" />
+                                </svg>
+                                <span>Login with Google</span>
+                            </button>
+                        </div>
+
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300/50"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-transparent text-gray-600 font-medium">or</span>
+                            </div>
+                        </div>
+
                         {error && (
-                            <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg">
+                            <div className="p-3 mb-4 text-sm text-red-600 bg-red-50/80 border border-red-100 rounded-lg">
                                 {error}
                             </div>
                         )}
@@ -346,7 +410,7 @@ export const SignInCard = () => {
                                             onChange={(e) => setName(e.target.value)}
                                             placeholder="John Doe"
                                             required={isSignup}
-                                            className="bg-gray-50 border-gray-200 w-full"
+                                            className="bg-white/50 backdrop-blur-sm border-white/60 placeholder:text-gray-500 text-gray-800 w-full focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </motion.div>
                                 )}
@@ -363,7 +427,7 @@ export const SignInCard = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter your email address"
                                     required
-                                    className="bg-gray-50 border-gray-200 w-full"
+                                    className="bg-white/50 backdrop-blur-sm border-white/60 placeholder:text-gray-500 text-gray-800 w-full focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
 
@@ -379,7 +443,7 @@ export const SignInCard = () => {
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password"
                                         required
-                                        className="bg-gray-50 border-gray-200 w-full pr-10"
+                                        className="bg-white/50 backdrop-blur-sm border-white/60 placeholder:text-gray-500 text-gray-800 w-full pr-10 focus:border-blue-500 focus:ring-blue-500"
                                     />
                                     <button
                                         type="button"
@@ -474,7 +538,7 @@ export const SignInCard = () => {
 
 const Index = () => {
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+        <div className="min-h-screen w-full flex items-center justify-center ombre-bg p-4 flex-col">
             <SignInCard />
         </div>
     );

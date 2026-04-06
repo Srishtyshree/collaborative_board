@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login } from '../controllers/auth.controller';
+import { signup, login, googleLogin } from '../controllers/auth.controller';
 import passport from '../lib/passport';
 import jwt from 'jsonwebtoken';
 
@@ -8,8 +8,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 router.post('/signup', signup);
 router.post('/login', login);
+router.post('/google', googleLogin as any);
 
-// Google OAuth routes
+// Google OAuth routes (Redirect Flow)
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', 

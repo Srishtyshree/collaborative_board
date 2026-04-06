@@ -4,14 +4,15 @@ import { Whiteboard } from './components/Whiteboard';
 import { LandingPage } from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import SignInPage from './components/ui/travel-connect-signin-1';
+import LoginSuccess from './components/LoginSuccess';
 import { initRoom } from './store/yjsSetup';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
-
+  const hasToken = !!localStorage.getItem('token');
   if (loading) return <div>Loading...</div>;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated && !hasToken) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 }
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/room/:roomId" element={<WhiteboardRoom isDarkMode={isDarkMode} />} />
           <Route path="/login" element={<SignInPage />} />
+          <Route path="/login-success" element={<LoginSuccess />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />

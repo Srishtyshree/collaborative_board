@@ -32,7 +32,7 @@ export default function LoginSuccess() {
             console.error('Failed to log in with Google: Missing parameters');
             navigate('/login');
         }
-    }, [searchParams, login, navigate]);
+    }, []);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

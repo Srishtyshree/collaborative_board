@@ -325,10 +325,14 @@ export const SignInCard = () => {
                             {isSignup ? "Start collaborating today" : "Sign in to your account"}
                         </p>
 
-                        <div className="mb-6">
+                        <motion.div
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="mb-6"
+                        >
                             <button
                                 type="button"
-                                className="w-full flex items-center justify-center gap-2 bg-white/50 border border-white/60 rounded-lg p-3 hover:bg-white/70 transition-all duration-300 text-gray-700 shadow-sm"
+                                className="w-full flex items-center justify-center gap-2 bg-white/50 border border-white/60 rounded-lg p-3 hover:bg-white/80 transition-all duration-300 text-gray-700 shadow-sm hover:shadow-lg hover:shadow-blue-100/50"
                                 onClick={() => loginWithGoogle()}
                             >
                                 <svg className="h-5 w-5" width="20" height="20" viewBox="0 0 24 24">
@@ -351,9 +355,9 @@ export const SignInCard = () => {
                                     />
                                     <path fill="#EA4335" d="M1 1h22v22H1z" fillOpacity="0" />
                                 </svg>
-                                <span>Login with Google</span>
+                                <span className="font-medium">Continue with Google</span>
                             </button>
-                        </div>
+                        </motion.div>
 
                         <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center">

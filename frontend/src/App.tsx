@@ -10,9 +10,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
-
+  const hasToken = !!localStorage.getItem('token');
   if (loading) return <div>Loading...</div>;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated && !hasToken) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 }

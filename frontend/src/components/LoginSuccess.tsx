@@ -20,24 +20,16 @@ export default function LoginSuccess() {
                 // Log the user in
                 login({ id, name, email }, token);
                 
-                // Small delay to ensure state is set before navigating
-                const timer = setTimeout(() => {
-                    console.log('Navigating to dashboard...');
-                    navigate('/dashboard', { replace: true });
-                }, 500);
-
-                return () => clearTimeout(timer);
+                // Navigate to dashboard immediately
+                console.log('Navigating to dashboard...');
+                navigate('/dashboard', { replace: true });
             } catch (err) {
                 console.error('Login error:', err);
                 navigate('/login');
             }
         } else {
             console.error('Failed to log in with Google: Missing parameters');
-            // If we're already on dashboard but seeing this, maybe we're already authenticated?
-            const timer = setTimeout(() => {
-                navigate('/dashboard');
-            }, 2000);
-            return () => clearTimeout(timer);
+            navigate('/login');
         }
     }, [searchParams, login, navigate]);
 

@@ -33,7 +33,7 @@ export default function Dashboard({ isDarkMode, setIsDarkMode }: { isDarkMode: b
         sharedWithMe: [],
         activeNow: []
     });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newBoardName, setNewBoardName] = useState('');
 

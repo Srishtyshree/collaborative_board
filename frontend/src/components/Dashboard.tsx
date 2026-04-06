@@ -26,10 +26,6 @@ export default function Dashboard({ isDarkMode, setIsDarkMode }: { isDarkMode: b
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        // fetch data when component mounts
-        fetchDashboard();
-    }, []);
     const [activeTab, setActiveTab] = useState('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [data, setData] = useState<{ myBoards: any[], sharedWithMe: any[], activeNow: any[] }>({
@@ -62,12 +58,13 @@ export default function Dashboard({ isDarkMode, setIsDarkMode }: { isDarkMode: b
 
     useEffect(() => {
         const init = async () => {
+            if (!token) return;
             setLoading(true);
             await fetchDashboard();
             setLoading(false);
         };
         init();
-    }, []);
+    }, [token]);
 
     const allBoards = useMemo(() => {
         // Overview should show ALL projects: saved, shared, AND live
